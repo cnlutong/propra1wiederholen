@@ -1,0 +1,113 @@
+= Professionelle Softwareentwicklung: Übung 2
+:icons: font
+:icon-set: fa
+:source-highlighter: rouge
+:experimental:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+[quote,Edsger Dijkstra]
+If debugging is the process of removing bugs, then programming must be the process of putting them in.
+
+== Vorwort
+
+Hier haben Sie ein Gradle-Projekt vorliegen, welches Sie erst in der kommenden Woche kennenlernen.
+Sie müssen an dieser Stelle nicht alles zur Projektstruktur verstehen.
+Es arbeitet sich meiner Meinung nach nur schöner, wenn man direkt in einem Projekt drin ist.
+
+NOTE: Die Projektdateien finden Sie im Ordner `app/src/main/java/propra/`.
+
+NOTE: Das Projekt können Sie auf der Konsole mit dem Befehl `./gradlew run` ausführen.
+
+== IDEs
+
+Entwicklungsumgebungen, wie Eclipse, IntelliJ und Co., unterstützen uns als Softwareentwickler:innen enorm.
+Suchen Sie sich die IDE aus, mit der Sie am besten arbeiten können.
+Bei mir sehen Sie aktuell IntelliJ.
+Sie sollten auf jeden Fall irgendeine Form der IDE auf Ihrem Computer einrichten und lernen damit umzugehen.
+Spätestens von nun an wird diese IDE Ihr ständiger Begleiter sein.
+
+Als Studierende der HHU erhalten Sie die Ultimate Version von IntelliJ kostenfrei https://www.jetbrains.com/de-de/education/[direkt von JetBrains].
+
+== Collections
+
+Collections erlösen uns endlich von den Plagen, die uns bei der täglichen Arbeit mit Arrays so bereitet haben :D Wir erhalten mit Java's Collections dynamische Datenstrukturen, die wir nach Belieben befüllen und verwenden können.
+In Woche 2 haben Sie dazu schon eine Menge gesehen.
+In dieser Übung werden wir uns nun die praktischen Aspekte von Collections anschauen.
+
+=== Listen
+
+NOTE: Wir arbeiten nun in der Datei link:app/src/main/java/propra/Zulassung.java[Zulassung.java] im Ordner `app/src/main/java/propra/`
+
+Wir wollen nun ein paar Punktzahlen einer fiktiven Klausur anlegen und diese abspeichern.
+In der Klasse `Zulassung.java` finden Sie die Methode `listen()`.
+
+1. Erstellen Sie eine https://docs.oracle.com/javase/8/docs/api/java/util/ArrayList.html[ArrayList] `punktzahlen`: `List<Integer> punktzahlen = new ArrayList<>();`.
+2. Fügen Sie nun ein paar Werte in die Liste ein: `42, 23, 12, 54, 20`.
+3. Schauen Sie sich an welche Methoden Ihnen nun auf dieser Collection zur Verfügung stehen.
+4. Fügen Sie den Wert `30` hinzu.
+5. Löschen Sie das dritte Element in Ihrer Liste.
+6. Geben Sie die Liste auf der Konsole mit einer ForEach-Schleife aus.
+7. Sortieren Sie die Liste mit `Collections.sort()`.
+8. Berechnen Sie die Durchschnittspunktzahl.
+9. Experimentieren Sie weiter mit dieser Collection.
+Welche Funktionen gibt es noch?
+Was könnte man hier noch berechnen?
+Wie viele Punktzahlen sind größer als 30 Punkte und haben damit unsere fiktive Klausur bestanden?
+
+=== HashMaps
+
+NOTE: Wechseln Sie zu der Methode `hashmaps` in der Klasse `Zulassung`.
+
+Nun ist es zwar schön die Punktzahlen gesehen zu haben, aber wir haben die Informationen zu den Matrikelnummern der Studierenden verloren.
+Hierfür verwenden wir eine https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html[HashMap].
+Eine HashMap speichert Schlüssel-Wert-Paare.
+So können wir als Schlüssel beispielsweise eine Matrikelnummer und als Wert die Punktzahl aus der Klausur wählen.
+
+1. Initialisieren Sie eine HashMap: `HashMap<Integer, Integer> matrikelnummerPunkte = new HashMap<>();`
+2. Mit der Funktion `put` können Sie die Map mit Inhalten befüllen.
+Nehmen Sie die Matrikelnummern `1942000, 1972300, 203400` und speichern Sie passende Punktzahlen ab.
+3. Geben Sie die Map auf der Konsole aus.
+4. Bei der Matrikelnummer 1942000 wollen wir eine andere Punktzahl hinterlegen.
+Führen Sie `put` erneut mit der Matrikelnummer 1942000 aus, aber speichern Sie eine andere Punktzahl ab.
+5. Geben Sie die Map auf der Konsole aus.
+Haben sich Werte geändert?
+6. Schlagen Sie eine Punktzahl in der Map nach, indem Sie mit `.get` auf der HashMap eine Matrikelnummer übergeben.
+7. (Ohne IDE schwierig:) Iterieren Sie mit einer ForEach-Schleife über das `.entrySet` und geben Sie Matrikelnummern und Punktzahlen in dem Format aus: `Matrikelnummer: 1942000, Punktzahl: 42`
+
+=== Sets
+
+NOTE: Wechseln Sie zu der Methode `set` in der Klasse `Zulassung`.
+
+Eine weitere häufig verwendete Art der Collection ist das HashSet.
+In Sets gibt es jeweils nur ein Element derselben Sorte.
+Würden Sie zweimal dieselbe Matrikelnummer in das Set werfen, würde die Matrikelnummer trotzdem nur einmal im Set vorkommen.
+
+1. Initialisieren Sie ein HashSet: `HashSet<Integer> matrikelnummern = new HashSet<>();`
+2. Fügen Sie dieselben Matrikelnummern wie in der Aufgabe oben hinein.
+3. Erstellen Sie ein zweites HashSet mit der Matrikelnummer 1942000 und einer weiteren Nummer.
+4. Führen Sie die Sets mit `.addAll` zusammen.
+5. Geben Sie das Set auf der Konsole aus.
+
+== (Bei Langeweile) Ausblick: Streams
+
+Operationen auf Collections können wunderbar mit Streams gelöst werden.
+Wir lernen Streams erst später im Semester, aber wer gerade Langeweile hat, kann sich nun die erste Aufgabe schnappen und versuchen sie mit Streams zu lösen.
+Eine funktionsfähige IDE hilft hier sehr.
+
+1. Wandeln Sie die ArrayList mit `.stream()` in einen Stream um.
+Welche Operationen haben Sie nun zur Verfügung?
+2. Sie können die Liste in einen https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html[IntStream] umwandeln, um so mehr vorgefertigte Rechenoperationen, wie `.average()`, `.sum()`, `.max()`, ..., zu erhalten.
+Hinweise zur Umwandlung finden Sie https://stackoverflow.com/questions/24633913/how-do-i-get-an-intstream-from-a-listinteger[beispielsweise hier].
+3. Geben Sie die höchste / durchschnittliche / minimale Punktzahl auf der Konsole aus.
+
+== Tool der Woche
+
+Letzte Woche haben Sie schon `thefuck` live bei mir in der Konsolensession gesehen.
+Dieses Tool korrigiert fehlerhafte / unvollständige Aufrufe in der Konsole und spart uns Tipparbeit.
+Das Repo mit Anleitungen finden Sie hier: https://github.com/nvbn/thefuck
