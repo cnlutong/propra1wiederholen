@@ -1,0 +1,368 @@
+= Professionelle Softwareentwicklung: Woche 4
+:icons: font
+:icon-set: fa
+:source-highlighter: rouge
+:experimental:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+== Begrüßung und Organisatorisches 
+Schauen Sie sich das https://youtu.be/E2qS-akDwoY[Begrüßungsvideo] an.
+
+=== English Groups
+
+We have decided to offer an english exercise group for students who are not fluent in german. Send us a mail (propra@cs.hhu.de) until May 9th if you want to participate. 
+
+=== Anmeldeplattform 
+
+Unsere Anmeldeplattform https://pure.mops.cs.hhu.de wurde etwas erweitert. Bei der Anmeldung für die dritte praktische Übung in der kommenden Woche können Sie, *solange der Anmeldezeitraum noch läuft*, eine Reservierung stornieren und einen neuen Termin wählen. 
+
+IMPORTANT: Eine Anmeldung nach der Anmeldefrist ist weiterhin nicht möglich. 
+
+=== Podcast Empfehlung
+
+Der SoftwareArchitekTOUR Podcast von heise hat oft spannende Themen, die auch gut zu den Inhalten unserer Veranstaltung passen. In der https://www.heise.de/developer/artikel/Episode-83-Architektur-Fehlschlaege-in-aller-Oeffentlichkeit-6033205.html[aktuellen Ausgabe] geht es um Fehlschläge bei IT Projekten und insbesondere um Anwendungen rund um die Corona-Pandemie.   
+
+== Gradle und Java Kompatibilität
+
+Wenn Sie Probleme mit Java und Gradle haben, dann kann das daran liegen, das Gradle 6.8.x nicht mit dem JDK 16 funktioniert. Sie können das entweder durch Verwendung eines älteren JDKs (z.B. 11) oder durch Verwendung einer neueren Gradle Version in Ordnung bringen. Wie Sie den Wrapper anpassen können, sehen Sie in dem unten verlinkten Video "Working with Gradle in IntelliJ IDEA".
+
+== Aufgabe 1: Die IDE - Freund und Helfer
+
+Erfahrungsgemäß benutzen die meisten von Ihnen IntelliJ als Entwicklungsumgebung, daher werden wir uns hier mit IntelliJ auseinandersetzen. Wenn Sie zum Beispiel lieber in Eclipse arbeiten möchten, ist das auch vollkommen in Ordnung. Sie müssen dann aber selber heraussuchen, wie Sie die gezeigten Funktionen dort ausführen können. Die meisten Funktionen sollten Sie auch in Eclipse wiederfinden.  
+
+Sie können die Community Version von IntelliJ verwenden. Als Studierende können Sie für die akademische Verwendung auch kostenfrei die kommerzielle Ultimate Version bekommen. Sie können diese Version über https://www.jetbrains.com/community/education/#students[diese Seite] erhalten. 
+
+=== IntelliJ und Gradle 
+
+Schauen Sie sich den Screencast https://www.youtube.com/watch?v=6V6G3RyxEMk[Working with Gradle in IntelliJ IDEA (2021)] von Trisha Gee an. Den Teil "Group ID and version number" können Sie ignorieren. In dem Beispiel wird ein komplexes Gradle Projekt, das aus mehreren Unterprojekten besteht importiert. Das werden wir auf absehbare Zeit nicht brauchen. Wenn Sie ein normales Gradle Projekt importieren wollen, öffnen Sie in IntelliJ den Ordner, in dem die Datei `build.gradle` liegt.
+
+*Leitfragen/Aufgaben:*
+
+* Aktualisieren Sie den Gradle Wrapper im Ordner `gradle_app` von Wochenblatt 3 auf die neuste Gradle Version (7.0), importieren Sie das Projekt in IntelliJ. Lassen Sie das Programm laufen.
+
+* Erzeugen Sie ein neues IntelliJ Gradle Projekt und fügen Sie die Apache Commons Collection Bibliothek (in der neusten Version) hinzu. Erzeugen Sie eine Klasse `Start` im Package `de.propra` und erzeugen Sie dort in der `main` Methode eine beliebige Multimap. Befüllen Sie die Multimap und geben Sie sie aus.
+
+=== Arbeiten mit IntelliJ 
+
+Schauen Sie sich das Video https://www.youtube.com/watch?v=yefmcX57Eyg&t=1395s[IntelliJ IDEA | Full Course | 2020] von Nelson Jamal von 00:23:15 bis 01:32:58 an und führen Sie die einzelnen Schritte selber an Ihrem Rechner durch. Hier sind noch einige zusätzliche Anmerkungen: 
+
+* Vor Minute 23:15 wird gezeigt, wie Sie IntelliJ und ein JDK installieren und wie Sie ein erstes Java Projekt erstellen. Richten Sie sich hier nach dem, was Sie im Video von Trisha Gee gesehen haben. *Verwenden Sie immer Gradle Projekte statt der reinen Java Projekte.* Dann unterscheidet sich natürlich auch die Ordnerstruktur etwas, statt `src` verwendet Gradle `src/main/java` als Ordner für Java Code.
+
+* Es wird in dem Video empfohlen auf die Classic Keymap zu wechseln. Das bezieht sich auf Mac OS, unter Windows und Linux gibt es die Keymap nicht. Die Classic Keymap ist etwas näher an den Einstellungen für die anderen Betriebssysteme, während die "normale" Mac OS Keymap an die Standards von Mac OS angelehnt ist.  
+
+* In dem Video wird gezeigt, wie Sie ein https://github.com/amigoscode/spring-boot-react-fullstack.git[Projekt] direkt von GitHub clonen, was für das Tutorial sicherlich sinnvoll ist. In unseren Veranstaltungsrepositorys ist aber in der Regel nicht nur ein Projekt, daher empfehlen wir Ihnen, unsere Repositorys von Hand zu klonen und dann die relevanten Anteile in IntelliJ zu öffnen.
+
+* Sie brauchen das Projekt, das gezeigt wird, nicht vollständig zu verstehen, wir werden aber im kommenden Semester Systeme entwickeln, die diesem ähneln. Zunächst geht es aber primär um die Demonstration der IntelliJ Features. Das Projekt verwendet Maven als Buildwerkzeug (erkennbar an der Datei `pom.xml`). 
+
+* Bei Minute 01:03:47 wird demonstriert, wie Sie einen regulären Ausdruck (oft auch RegEx genannt) zur Suche verwenden. Wenn wir von regulären Ausdrücken sprechen, dann sind die RegEx gemeint, die uns in Programmiersprachen und den allermeisten Texteditoren im Search & Replace Dialog zur Verfügung stehen. Die Herkunft der RegEx sind die regulären Sprachen, die Sie in der theoretischen Informatik vielleicht schon kennengelernt haben, aber RegEx sind viel mächtiger. Wir werden RegEx nicht im Rahmen der Veranstaltung behandeln, aber sie sind eines der hilfreichsten Werkzeuge, die Sie erlernen können. In https://youtu.be/MoBv6Z44Zq4[diesem Video] sehen Sie warum. Eines der besten Bücher zum Thema ist https://katalog.ulb.hhu.de/Record/9947404882006443[Mastering regular Expressions] von Jeffrey Friedl.
+
+*Leitfragen/Aufgaben:*
+
+* Führen Sie die Schritte aus dem Tutorial selber durch. Notieren Sie sich die wichtigsten Dinge, die Sie dabei lernen. 
+
+=== Effektiver arbeiten mit IntelliJ 
+
+[quote, Victor Rentea]
+When it's red, yellow, blue or gray, Alt-Enter will save your day.
+
+Eine IDE ist nicht nur ein Texteditor mit einem "Run" Button, wie Sie hoffentlich bereits festgestellt haben. Es ist extrem wichtig, dass Sie in Ihrer IDE effektiv sind, denn Sie können so die kognitive Belastung beim Programmieren drastisch reduzieren und sich besser auf die wesentlichen Dinge konzentrieren. 
+
+Es erfordert praktische Übung, bis Sie die Features der IDE kennengelernt haben und ohne großes Nachdenken anwenden können. Erweitern Sie Ihr Repertoire an Funktionen Stück für Stück. Starten Sie mit den Videos https://youtu.be/QYO5_riePOQ[Top 15 IntelliJ IDEA Shortcuts] von Trisha Gee und https://www.youtube.com/watch?v=DF1RwdDw8Iw[Tips for using IntelliJ IDEA effectively] von Sebastian Daschner. Versuchen Sie die dort gezeigten Shortcuts möglichst oft zu verwenden.
+
+NOTE: Es gibt in diesen Videos immer Überschneidungen. Diese Überschneidungen sind die wirklich wichtigen Shortcuts!
+
+Schauen Sie sich im Laufe der nächsten Wochen und Monaten auch die Videos von Hadi Hariri und Victor Rentea im Zusatzmaterial an und verbessern Sie so schrittweise Ihren Umgang mit der IDE. 
+
+*Leitfragen/Aufgaben:*
+
+* Schreiben Sie ein Hello World Programm. Verwenden Sie dabei ausschließlich die Tastatur. 
+
+* Erstellen Sie eine Top 10 Liste von Shortcuts, die Sie für nützlich halten. Versuchen Sie diese Shortcuts konsequent zu verwenden, wenn Sie programmieren. 
+
+*Zusatzmaterial:*
+
+* https://youtu.be/eq3KiAH4IBI[42 IntelliJ IDEA Tips and Tricks] von Hadi Hariri
+
+* https://www.youtube.com/watch?v=iDACqmp7fZA[Doubling Your Coding Speed - Tips & Tricks from the Fastest Java Developers] von Victor Rentea
+
+=== Refactoring 
+
+[quote, Wikipedia]
+Refactoring (auch Refaktorisierung, Refaktorierung oder Restrukturierung) bezeichnet in der Softwareentwicklung die manuelle oder automatisierte Strukturverbesserung von Quelltexten unter Beibehaltung des beobachtbaren Programmverhaltens. Dabei sollen Lesbarkeit, Verständlichkeit, Wartbarkeit und Erweiterbarkeit verbessert werden, mit dem Ziel, den jeweiligen Aufwand für Fehleranalyse und funktionale Erweiterungen deutlich zu senken. 
+
+Wir werden uns später auch mit manuellem Refactoring befassen, hier interessieren uns aber zunächst die automatischen Refactorings, die uns die IDE anbietet. Der große Vorteil solcher automatischen Refactorings ist, dass sie (fast) immer korrekt ausgeführt werden, während bei manuellen Refactorings immer die Gefahr besteht, dass wir Fehler machen. 
+
+Sie haben im Video bereits einige Refactorings gesehen. Beispiele sind die Extraktion und das Inlinen von Variablen oder Methoden. 
+
+Ein extrem hilfreicher Shortcut ist `CTRL + T`. Damit öffnet sich ein Dialog, aus dem Sie die für die aktuelle Stelle im Code relevanten Refactorings auswählen können.  
+
+Wir wollen uns hier die Top 3 der Refactorings anschauen, Sie sollten sich aber über kurz oder lang das komplette `Refactorings` Menü anschauen und herausfinden, was sich hinter den einzelnen Refactorings verbirgt. Es gibt dazu eine entsprechende https://www.jetbrains.com/help/idea/refactoring-source-code.html[Dokumentation]. 
+
+* *Rename* Das mit Abstand wichtigste Refactoring verbirgt sich hinter dem Shortcut `Shift + F6`. Damit können Sie Variablen, Methoden, Klassen, Parameter, etc. sicher umbenennen. Es werden dabei alle relevanten Stellen automatisch umbenannt. Es wird kein einfaches Search & Replace durchgeführt, denn die IDE weiß, an welchen Stellen dasselbe "Ding" gemeint ist und nur diese Stellen werden umbenannt. 
+
+* *Extract/Introduce* Diese Shortcuts haben Sie bereits gesehen. Die Shortcuts haben die Form `CMD+ALT` bzw. `CTRL+ALT` + `Buchstabe`. Die gängigen Varianten sind `M` um Methoden, `F` um Felder, `C` um Konstanten und `V` um lokale Variablen zu extrahieren. 
+
+* *Inline* Das Inline Refactoring ist das Gegenteil von *Extract/Introduce*.
+
+*Leitfragen/Aufgaben:*
+
+* Schreiben Sie eine public Klasse `Bar`, mit einem Attribut `foo`. Schreiben Sie in der Klasse eine Methode, die einen Parameter `foo` übergeben bekommt. Führen Sie das Rename-Refactoring sowohl für das Attribut, als auch für den Parameter durch.
+
+* Führen Sie das Rename-Refactoring auf dem Klassennamen durch, beobachten Sie den Dateinamen. Schreiben Sie eine weitere Klasse, die `Bar` verwendet (z.B. eine Instanz erzeugt) und wiederholen Sie das Rename-Refactoring. 
+
+=== Debugging 
+
+Schauen Sie sich das Video zum https://youtu.be/z-MndD-ThsU[Debugging mit IntelliJ] und dann das Video https://youtu.be/lAWnIP1S6UA[Debugger basics in IntelliJ IDEA] von Mala Gupta an. 
+
+Im Laufe der nächsten Wochen sollten Sie sich auch das Video zu den fortschrittlichen Debugger Features im Zusatzmaterial anschauen, dort wird zum Beispiel gezeigt, wie Sie Lambda Ausdrücke und Streams debuggen können.
+
+*Leitfragen/Aufgaben:*
+
+* Im Ordner `debugger` finden Sie das Projekt aus dem Video. Finden Sie den Fehler mithilfe des Debuggers und beheben Sie das Problem. 
+
+* Fügen Sie in der `main` Methode von `WordAnalyzerTester` den Aufruf `test(null);` hinzu und lassen Sie das Programm laufen. Setzen Sie dann einen Exception Breakpoint und starten Sie das Programm im Debugger Modus. 
+
+*Zusatzmaterial:*
+
+* https://youtu.be/AOrnx-9zNBQ[Advanced Debugger Features in IntelliJ IDEA] von Mala Gupta
+
+
+== Java Upgrade 
+
+=== Der Aufzählungsdatentyp
+
+Gelegentlich benötigen wir Datentypen, um eine endliche Auswahl von Möglichkeiten zu repräsentieren wie zum Beispiel Wochentage. Wir könnten natürlich einen `String` verwenden oder eine Klasse mit `int` Konstanten schreiben:
+
+[source, java]
+----
+public class Wochentag {
+  public static final int MONTAG = 0;
+  public static final int DIENSTAG = 1;
+  public static final int MITTWOCH = 2;
+  public static final int DONNERSTAG = 3;
+  public static final int FREITAG = 4;
+  public static final int SAMSTAG = 5;
+  public static final int SONNTAG = 6;
+}
+----
+
+Aber es gibt deutliche Nachteile der beiden Repräsentationen. Wir können in der Typisierung nicht zwischen Werten unterscheiden, die Wochentage repräsentieren und solchen, die "normale" Datenwerte repräsentieren. Ist das Ergebnis von `12 % 5` der Wert `2` oder `MITTWOCH`? Bei Strings kommt dazu, dass sie fehleranfällig gegenüber Tippfehlern sind.
+
+Wir können eine einfache typsichere Variante folgendermaßen umsetzen
+
+[source, java]
+----
+public final class Wochentag {
+  public static final Wochentag MONTAG = new Wochentag();
+  public static final Wochentag DIENSTAG = new Wochentag();
+  public static final Wochentag MITTWOCH = new Wochentag();
+  public static final Wochentag DONNERSTAG = new Wochentag();
+  public static final Wochentag FREITAG = new Wochentag();
+  public static final Wochentag SAMSTAG = new Wochentag();
+  public static final Wochentag SONNTAG = new Wochentag();
+  
+  private Wochentag() {}
+}
+----
+
+Diese Klasse können wir nun verwenden, um Wochentage in einem Programm verwenden, ohne Gefahr zu laufen, dass wir versehentlich Wochentag mit anderen Werten durcheinanderbringen. 
+
+[source, java]
+----
+Wochentag heute = Wochentag.MITTWOCH;
+Wochentag v1 = Wochentag.DONNERSTAG;
+Wochentag v2 = Wochentag.MITTWOCH;
+System.out.println(heute == v1); // => false
+System.out.println(heute == v2); // true
+----
+
+Es gibt aber noch einige Aspekte, die den Umgang mit der Implementierung etwas sperrig gestalten. 
+
+* Es wäre schön, wenn wir eine Ordnung auf den Werten hätten. Optimalerweise wollen wir die Werte in Sortierreihenfolge in die Klasse schreiben. Wir könnten natürlich die Klasse das `Comparable<Wochentag>` Interface implementieren lassen und `compareTo` implementieren. 
+* Ähnlich nützlich wäre es, die Position des Aufzählungswerts zu kennen. Das wäre auch bei der `compareTo` Methode hilfreich. Wir könnten das lösen, indem wir zu jedem Wert dessen Position abspeichern.
+* Es wäre auch gut, wenn wir eine Repräsentation als `String` zur Anzeige der Werte bekommen könnten. Dazu könnten wir ein internes `String` Attribut verwenden. 
+
+Eine Implementierung, die diese drei Eigenschaften hat, könnte so aussehen 
+
+[source, java]
+----
+public class Wochentag implements Comparable<Wochentag> {
+
+  public static final Wochentag MONTAG;
+  public static final Wochentag DIENSTAG;
+  public static final Wochentag MITTWOCH;
+  public static final Wochentag DONNERSTAG;
+  public static final Wochentag FREITAG;
+  public static final Wochentag SAMSTAG;
+  public static final Wochentag SONNTAG;
+
+  static {
+    MONTAG = new Wochentag("MONTAG", 0);
+    DIENSTAG = new Wochentag("DIENSTAG", 0);
+    MITTWOCH = new Wochentag("MITTWOCH", 0);
+    DONNERSTAG = new Wochentag("DONNERSTAG", 0);
+    FREITAG = new Wochentag("FREITAG", 0);
+    SAMSTAG = new Wochentag("SAMSTAG", 0);
+    SONNTAG = new Wochentag("SONNTAG", 0);
+  }
+
+  private final String name;
+  private final int ordinal;
+
+  public Wochentag(String name, int ordinal) {
+    this.name = name;
+    this.ordinal = ordinal;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public int getOrdinal() {
+    return ordinal;
+  }
+
+  @Override
+  public int compareTo(Wochentag that) {
+    return Integer.compare(this.ordinal, that.ordinal);
+  }
+}
+----
+
+Der Code, den wir für diese Art von Klassen schreiben würden, ist sich immer sehr ähnlich. Einen Teil der Funktionen könnten wir sicherlich als abstrakte Klasse schreiben, aber das Erzeugen und Initialisieren der Konstanten würden wir nicht loswerden.
+
+Seit Java 5 gibt es eine besondere Form von Klassen, die statt mit `class` mit `enum` deklariert werden und wo während der Kompilation eine Implementierung erzeugt wird. 
+
+Eine `enum`, die sich im Wesentlichen wie unsere händisch geschriebene Klasse verhält, sieht so aus:
+
+[source, java]
+----
+public enum Wochentag {
+   MONTAG, DIENSTAG, MITTWOCH, DONNERSTAG, FREITAG, SAMSTAG, SONNTAG;
+}
+----
+
+Wenn wir die so erzeugte Klasse mit einem Decompiler in Java-Code zurückübersetzen erhalten wir folgende Klasse
+
+[source, java]
+----
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: packimports(3) 
+// Source File Name:   Wochentag.java
+
+
+public final class Wochentag extends Enum
+{
+
+    public static Wochentag[] values()
+    {
+        return (Wochentag[])$VALUES.clone();
+    }
+
+    public static Wochentag valueOf(String name)
+    {
+        return (Wochentag)Enum.valueOf(Wochentag, name);
+    }
+
+    private Wochentag(String s, int i)
+    {
+        super(s, i);
+    }
+
+    public static final Wochentag MONTAG;
+    public static final Wochentag DIENSTAG;
+    public static final Wochentag MITTWOCH;
+    public static final Wochentag DONNERSTAG;
+    public static final Wochentag FREITAG;
+    public static final Wochentag SAMSTAG;
+    public static final Wochentag SONNTAG;
+    private static final Wochentag $VALUES[];
+
+    static 
+    {
+        MONTAG = new Wochentag("MONTAG", 0);
+        DIENSTAG = new Wochentag("DIENSTAG", 1);
+        MITTWOCH = new Wochentag("MITTWOCH", 2);
+        DONNERSTAG = new Wochentag("DONNERSTAG", 3);
+        FREITAG = new Wochentag("FREITAG", 4);
+        SAMSTAG = new Wochentag("SAMSTAG", 5);
+        SONNTAG = new Wochentag("SONNTAG", 6);
+        $VALUES = (new Wochentag[] {
+            MONTAG, DIENSTAG, MITTWOCH, DONNERSTAG, FREITAG, SAMSTAG, SONNTAG
+        });
+    }
+}
+----
+
+Zur Dekompilation wurde hier ein ziemlich veralteter Decompiler (JAD) über die Webseite http://www.javadecompilers.com/ verwendet. Modernere Decompiler übersetzen das `.class` File in eine `enum`, was uns hier bei dem Verständnis nicht weiterbringt.
+
+Die Klasse ist sehr ähnlich zu dem, was wir von Hand geschrieben haben. Die Methoden, die allgemeingültig sind, sind in der Klasse `Enum` untergebracht, von der jeder erzeugte Aufzählungstyp erbt. Der Compiler hat für uns die Konstanten und die Initialisierung erzeugt. Es gibt auch noch eine statische Methode, die aus einem `String` den gleichnamigen Aufzählungswert erzeugt. 
+
+[source, java]
+----
+Wochentag heute = Wochentag.valueOf("FREITAG");
+----
+
+Wir können in einer Enumeration auch noch Zusatzinformationen an unsere Elemente anhängen und auch Methoden definieren. Angenommen, wir wollen die Information, ob es sich um einen Werktag (also Mo. - Sa.) handelt an die einzelnen Werte anhängen. Außerdem wollen wir eine Methode `morgen` haben, die den nächsten Tag zurückgibt. 
+
+[source, java]
+----
+public enum Wochentag {
+
+  MONTAG, DIENSTAG, MITTWOCH, DONNERSTAG, FREITAG, SAMSTAG, SONNTAG(false);
+
+  private final boolean werktag;
+
+  Wochentag(boolean werktag) {
+    this.werktag = werktag;
+  }
+
+  Wochentag() { 
+    // Vereinfacht die Deklaration von Mo. bis Sa. 
+    // Sonst müssten wir MONTAG(false), DIENSTAG(false), .. schreiben
+    this(true); // Aufruf des anderen (!) Konstruktors
+  }
+
+  public Wochentag morgen() {
+    int index = this.ordinal() + 1 % values().length;
+    return values()[index];
+  }
+
+  public boolean isWerktag() {
+    return werktag;
+  }
+}
+----
+
+Eine Verwendung könnte so aussehen
+
+[source, java]
+----
+    Wochentag samstag = Wochentag.SAMSTAG;
+    Wochentag morgen = samstag.morgen();
+    System.out.println(samstag + ": " + samstag.isWerktag()); // => SAMSTAG: true
+    System.out.println(morgen + ": " + morgen.isWerktag()); // => SONNTAG: false
+----
+
+=== Static en detail 
+
+Schauen Sie sich das Video zum Thema https://youtu.be/q7qcf5D4CTQ[statische Attribute und Methoden] an. 
+
+
+*Leitfragen/Aufgaben:*
+
+* Kompilieren Sie die `enum` mit den Zusatzinformationen und verwenden Sie http://www.javadecompilers.com/ um die Klasse mit JAD zu dekompilieren. Vergleichen Sie die Konstruktoren der dekompilierten Klasse mit denen, die wir geschrieben haben. Was hat sich geändert?
+
+* Versuchen Sie einmal die zusätzlichen Konstruktoren `public` zu machen. Warum ist es nicht sinnvoll das zu tun? Welche Modifier sind erlaubt? 
+
+*Zusatzmaterial:*
+
+* https://youtu.be/NIUGbgLU5Uk[Java Tutorial - Enums]
+
