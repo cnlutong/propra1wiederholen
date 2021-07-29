@@ -1,0 +1,10 @@
+@startuml
+
+class Marketing
+class MailVersand
+class MarketingCore
+class Kalender
+
+class WetterDienst
+class KundenRepository <<repository>>
+@enduml

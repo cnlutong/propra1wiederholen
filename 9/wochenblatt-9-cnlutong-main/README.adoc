@@ -1,0 +1,598 @@
+= Professionelle Softwareentwicklung: Woche 9
+:icons: font
+:icon-set: fa
+:stem: latexmath
+:source-highlighter: rouge
+:experimental:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+== Begrüßung und Organisatorisches 
+Schauen Sie sich das https://youtu.be/fmPsVkzIG-8[Begrüßungsvideo] an.
+
+=== Korrektor:innen und Tutor:innen gesucht
+
+Die Informatik sucht engagierte Studierende zur Unterstützung der Grundlagenlehre im Wintersemester 2021/22. Gesucht werden Korrektor:innen und Tutor:innen für die Veranstaltungen Programmierung, Algorithmen und Datenstrukturen, Rechnerarchitektur und Softwareentwicklung im Team. Die Einstellungen erfolgen über vier bzw. sechs Monate mit 7-17h/Woche. 
+
+Die Bewerbungsfrist endet am *28. Juni 2020* um 07:00 Uhr.
+Weitere Informationen finden Sie unter https://cs.hhu.de/jobs
+
+=== Anmeldung zur fünften praktischen Übung
+
+Die fünfte praktische Übung findet in der nächsten Woche (14.06.2021 bis 18.06.2021) statt. 
+
+Die Anmeldefrist auf https://pure.mops.cs.hhu.de endet am 10.06.2021, 14:30 Uhr. 
+
+== Zum Warmwerden
+
+Wir haben schon einiges über die Strukturierung von Tests gelernt und uns auch JUnit und AssertJ angeschaut. Rufen Sie sich bitte folgende Dinge ins Gedächtnis:
+
+* Was ist das Allerwichtigste bei einem Test?
+* Was bedeutet AAA?
+* Was ist FIRST?
+
+Schauen Sie sich nun https://github.com/apache/pdfbox/blob/trunk/pdfbox/src/test/java/org/apache/pdfbox/text/BidiTest.java[diesen Test] an und bilden Sie sich eine Meinung darüber, ob Sie diesen Test gut finden oder nicht. Begründen Sie Ihre Meinung. 
+
+NOTE: Der Test stammt aus der Bibliothek, die Sie bei der Putzplan-Übung zur Erzeugung des PDF-Dokuments benutzt haben.
+
+Wir rekapitulieren jetzt noch einmal Dependency Injection und Inversion als Tricks, mit denen wir die Dependencies einer Komponente in den Griff bekommen und schauen uns dann die konkrete Anwendung dann in drei Fallstudien an.
+
+=== Dependency Injection
+
+Dependency Injection ist der Name dafür, dass wir uns andere Klassen nicht mit `new` selber erzeugen, sondern von Außen erzeugen lassen und dann im Konstruktor übergeben bekommen. 
+
+Wir überführen Code, der so aussieht: 
+
+[source, java]
+----
+class A {
+  private B b = new B();
+  // ...
+}
+
+// Aufrufer 
+public static void main(String[] args) { 
+    A a = new A();
+} 
+----
+
+in Code, der so aussieht:
+
+[source, java]
+----
+class A {
+  private B b;
+
+  public A(B b) {
+    this.b = b;
+  }
+  // ...
+}
+
+// Aufrufer 
+public static void main(String[] args) { 
+    B b = new B();
+    A a = new A(b);
+} 
+----
+
+Auf diese Weise bekommen wir den Kontext der zu testenden Klasse unter unsere Kontrolle und können in einem Test der zu testenden Komponente eine andere Dependency "unterschieben". Wir könnten, wenn wir `A` testen wollen, eine Klasse `FakeB` erzeugen, die von `B` erbt und dann im Test `A a = new A(new FakeB());` verwenden.
+
+=== Dependency Inversion 
+
+Klassenvererbung ist nicht das Mittel der Wahl um Komponenten austauschbar zu machen. Es ist, wenn wir Implementierungen austauschen wollen, im Normalfall besser, ein Interface zu verwenden. Bei Tests brauchen wir das nicht zwangsläufig, aber wenn wir tatsächlich das Potenzial sehen, dass in Zukunft mehr als eine Implementierung notwendig wird, dann ist die Verwendung eines Interfaces sinnvoll. 
+
+[source, java]
+----
+class A {
+  private IB b; // IB ist ein Interface, das von B implementiert wird
+
+  public A(IB b) {
+    this.b = b;
+  }
+  // ...
+}
+
+// Aufrufer 
+public static void main(String[] args) { 
+    IB b = new B();
+    A a = new A(b);
+} 
+----
+
+== Aufgabe 1: Fallstudien - Dependency-Management
+
+Schauen wir uns nun drei konkrete Beispiel an, in denen wir mithilfe von Zerlegung in Komponenten sowie Dependency Injection und Inversion das Testen von Komponenten ermöglichen. 
+
+=== Greeter
+
+Wir haben schon in Woche 6 ein Beispiel gesehen, wo es schwierig war, die Anwendung zu testen und wir haben in Woche 7 auch schon eine Lösung für das Problem gesehen, bei der wir Dependency Injection und Dependency Inversion verwendet haben. 
+
+Die Anwendung hat, je nach Uhrzeit, eine unterschiedliche Ausgabe auf `System.out` geschrieben. Das Problem, das beim Testen auftritt, ist, dass wir den Test zu unterschiedlichen Zeiten laufen lassen wollen und trotzdem reproduzierbare Ergebnisse erzeugen wollen. Wir müssen also die Uhrzeit in geeigneter Weise für den Test festlegen. Das zweite Problem war, dass das Programm `System.out.println` aufruft. Diesen Aufruf können wir nicht so einfach im Programm abgefangen.
+
+NOTE: Wir können zwar den Output über `System.setOut` setzen, allerdings wird die Ausgabe dann global umgebogen und wir müssen darauf achten, dass wir den Originalzustand des Systems nach dem Test wieder herstellen. Außerdem stellt sich die Frage, was passiert, wenn der Code nebenläufig Ausgaben erzeugt oder wir versuchen Tests parallel auszuführen. 
+
+Eine Lösung für das Problem ist, `System.out` und `LocalDateTime.now()` als externe Komponenten zu betrachten und die Komponenten außerhalb der Komponente zu erzeugen und als Parameter in die Komponente hineinzugeben.
+
+== Bendispostos Bällchen Bude
+
+Dieses verfluchte Virus! Wegen SARS-CoV-2 läuft das Geschäft in Onkel Giacomos Eiscafé :icecream: nicht gut. Die Gäste bleiben aus und Tante Irma macht sich große Sorgen um die Zukunft. Aber Onkel Giacomo hätte sich nicht 40 Jahre im Geschäft gehalten, wenn er nicht einfallsreich wäre. Er hat eine Online Marketing-Kampagne gestartet und dazu hat Cousin Vincenzo, der sonst Software für Banken entwickelt, eine Anwendung geschrieben, die automatisch regelmäßig Erinnerungsmails (lies: Spammails) an Kunden verschickt. 
+
+Die Software ist etwas in Eile entwickelt worden, funktioniert aber soweit. Trotzdem möchte Onkel Giacomo, dass etwas Liebe in das Programm investiert wird, da er einige Anpassungen in der Zukunft erwartet. Das Programm wird mit zwei Hilfsprogrammen (mail.jar und wetter.jar) ausgeliefert. Die beiden Programme verschicken E-Mails (nicht wirklich!) und besorgen Wetterdaten (auch nicht wirklich). Die Art und Weise, wie Mails geschickt werden und die Wetterdaten geholt werden, wird sich in Zukunft ziemlich sicher ändern. Vincenzo denkt darüber nach, eine digitale Wetterstation zu kaufen und für die Anwendung zu nutzen. Weil es professioneller wirkt, will er bei den Mails von GMail vielleicht zu einem eigenen Mailserver wechseln, welcher in einer eigenen Domain betrieben wird. Bei der Datenbank wird über ein Umzug von Apache Derby auf MySQL oder Postgres nachgedacht. Die Regeln, die entscheiden, ob und wann welche Mail an wen verschickt wird, sind die Stellen, an denen sich am häufigsten etwas ändern wird. Hier wird Onkel Giacomo sicherlich mehrmals pro Woche Anpassungen vornehmen wollen. 
+
+Unsere Aufgabe ist, das Programm umzustrukturieren und dabei die Wartbarkeit der Software zu verbessern. Wir sollten dabei folgende Punkte beachten:
+
+. Identifizieren Sie die Komponenten, in die das Programm zerlegt werden sollte. 
+. Definieren Sie die Schnittstellen der Komponenten und kapseln Sie jede Komponente in einem Java Package.
+. Sorgen Sie für die Trennung von Konstruktion und Ausführung durch Verwendung von Dependency Injection.
+. Verwenden Sie Dependency Inversion, um die Kopplung zwischen den Komponenten zu lockern.
+
+Außerdem wollen wir die Testbarkeit des Codes verbessern. Wir wollen reproduzierbare Tests und benötigen deswegen Kontrolle über die Umgebung. Die Übernahme der Kontrolle erfolgt, indem wir beispielsweise die Wetterdaten durch feste, vorbestimmte Werte für einen Test festlegen. 
+Wir wollen nicht bis Montag warten um zu testen, ob unsere Anwendung Cassata vorschlägt oder bis Juni warten um zu prüfen, dass bei heißem Wetter am Morgen Granita vorgeschlagen wird. Die Tests sollen auch 3 Uhr Nachts im Januar das richtige Ergebnis produzieren. 
+
+Werfen Sie einen Blick in die Implementierung in `bbb_initial_version`. Es reicht, wenn Sie grob verstehen wie der Code strukturiert ist. Achten Sie also eher auf den Kontrollfluss und nicht so sehr auf die genaue Implementierung.  
+
+Schauen Sie sich zur Kontrolle das Video an, in dem die https://youtu.be/q7TB9_JNeHA[Struktur und Funktionsweise] der BBB Anwendung erklärt wird. 
+
+Versuchen Sie die Anwendung in `bbb_initial_version` im Hinblick auf die bisher kennengelernten Prinzipien und die oben genannten Punkte zur Wartbarkeit selber umzustrukturieren.
+
+Schauen Sie sich zur Kontrolle das Video zum https://youtu.be/lUORkDgBhzg[Refactoring] an.
+
+Schreiben Sie nun Unit-Tests für die `MarketingCore` Klasse. Sie können Ihre eigenes Refactoring verwenden oder die Version im Ordner `bbb`. In dem Video zum Thema https://youtu.be/E1qVGnaDqEI[Testen] der BBB Anwendung wird gezeigt, wie Sie die Anwendung testen können, versuchen Sie es aber ruhig vorher einmal selbst.
+
+NOTE: In dem Video wird in dem Test Mockito verwendet. Was Mockito ist, behandeln wir in Aufgabe 2. 
+
+== Minesweeper Highscore
+
+In der Fallstudie geht es um das Testen der Highscore-Verwaltung einer Minesweeper Implementierung. Schauen Sie sich dazu das Video zur https://youtu.be/0rZA2JDvdEU[Minesweeper Fallstudie] an. Auch hier wird die Zerlegung in Komponenten genutzt, um die zu testende Komponente gegenüber ihrer Umgebung abzugrenzen und so die Testbarkeit zu verbessern.
+
+=== Re­sü­mee der Fallstudien 
+
+Die beiden Fallstudien zeigen, wie wichtig eine Zerlegung in Komponenten ist. In vielen Fällen müssen wir Kollaborateure der Klassen, die wir testen wollen, durch sogenannte Test-Doubles ersetzen, also durch Objekte, die wir für den Test kontrollieren können. Beispiele für solche Fälle sind Kollaborateure, die 
+
+* sich nichtdeterministisch verhalten. Dazu gehören Zufallszahlengeneratoren, aber auch Zeit, Datum, Wetter, Messwerte von Sensoren, usw. 
+* schwierig zu isolieren sind. Dazu gehört beispielsweise der Zugriff auf Dateien. 
+* "teuer" sind. Ein typisches Beispiel ist der Zugriff auf Datenbanken. Grundsätzlich ist der Datenbankzugriff nicht langsam, aber er ist langsamer als der Zugriff auf den Speicher. Ein weiterer Aspekt ist bei der Datenbank die Isolation. Isolation einer Datenbank ist grundsätzlich kein großes Problem, wir können eine separate Datenbankinstanz starten, aber das trägt natürlich nicht unbedingt zur Geschwindigkeit des Tests bei.
+* unzuverlässig sind. Unter diese Kategorien fallen Komponenten, die nicht immer ein Ergebnis liefern, zum Beispiel eine Komponente, die auf ein Ergebnis zugreift, das über das Netzwerk geliefert wird. Wir wollen hier im Test sowohl den Fall testen, dass ein Ergebnis geliefert wird, aber auch den Fall, dass ein Fehler auftritt. Das müssen wir aber sicher kontrollieren, um reproduzierbare Tests zu schreiben
+* unerwünschte Seiteneffekte haben. Wir wollen sicherlich nicht Mails verschicken, wenn wir einen Test laufen lassen. 
+
+*Leitfragen/Aufgaben:*
+
+* In der Greeter Version von Wochenblatt 7 haben wir die Komponenten eigentlich nicht als Klassen-Dependencies injiziert, sondern die Methode mit zusätzlichen Werten aufgerufen. Versuchen Sie einmal den Code im Ordner `Greeter` so umzustrukturieren, dass die Dependencies tatsächlich Klassen-Abhängigkeiten sind, d.h. die Methode `void greet()` muss die Signatur beibehalten. Versuchen Sie, eine vollständige Testabdeckung der `Greeter` Klasse zu erreichen.
+
+* Nehmen wir einmal an, der Wetterdienst, den wir für die Bällchenbude verwenden ist etwas unzuverlässig und liefert von Zeit zu Zeit heftige Ausreißer bei der Temperatur. Wir schreiben nun etwas Code, sodass nicht direkt die Daten des Wetterdiensts verwendet werden, sondern ein gleitender Durchschnitt über die letzten 20 gemessenen Werte. Wie könnte ein Test (insbesondere die beteiligten Test-Doubles) aussehen, der diese Funktion testet? Am besten implementieren Sie das System einfach einmal selber. 
+
+* Der Mailversand der Bällchenbude ist leider nicht immer vollständig zuverlässig. Wenn eine Mail nicht verschickt werden kann, wirft die Implementierung eine `IllegalStateException`. Unsere Anwendung soll damit umgehen können (z.B. Loggen und nicht abstürzen). Schreiben Sie einen Test, der prüft, dass die Anwendung nicht crasht und reparieren Sie die Implementierung, fass das notwendig ist.
+
+== Aufgabe 2: Mocking mit Mockito
+
+Wir haben in den Fallstudien gesehen, wie wir Dependencies in unseren Tests durch Test-Doubles ersetzen, um so Kontrolle über die Testausführung zu erhalten. Dazu führen wir für die Dependency ggf. ein Interface ein und verdrahten die Komponenten über Injection.
+
+Etwas unschön ist dabei, dass wir die Interfaces immer vollständig implementieren müssen, was zu ziemlich viel https://de.wikipedia.org/wiki/Boilerplate-Code[Boilerplate-Code] führt. Wenn unser Test-Double von der Originalklasse erbt, müssen wir vielleicht nicht alle Methoden überschreiben, aber wir erzeugen trotzdem jede Menge Boilerplate-Code, weil wir neue Klassen schreiben. 
+
+Hier hilft uns Mockito weiter, mit dessen Hilfe wir Test-Doubles "on the fly" für unsere Tests erzeugen können. Es gibt eine ganze Reihe anderer Werkzeuge für das sogenannte Mocking. Wir verwenden Mockito, weil es in dem Spring Framework, das wir künftig verwenden, inkludiert ist. Wir können uns Mockito außerhalb von Spring als ganz gewöhnliche Gradle Dependency holen:
+
+[source, groovy]
+----
+dependencies {
+    // ...
+    testImplementation 'org.mockito:mockito-core:3.10.0'
+}
+----
+
+Um mit Mockito ein Test-Double zu erzeugen, gibt es die statische Methode `mock(Class c)` in der Klasse `Mockito`. Die Methode erzeugt eine Instanz der übergebenen Klasse, deren Methoden durch speziellen Testcode ersetzt wurde.
+
+Es gibt eine ganze Reihe von Begriffen im Zusammenhang mit Test-Doubles, die oft nicht ganz scharf verwendet werden. Es gibt nicht immer eine ganz präzise Definition. Darüber hinaus werden die Bibliotheken, die verwendet werden, um das Schreiben von Test-Doubles zu erleichtern, oft Mocking Frameworks genannt, obwohl Mocks tatsächlich nur eine bestimmte Art von Test-Doubles sind und die Frameworks auch in der Lage sind andere Arten von Doubles zu unterstützen. Die Unschärfe der Begrifflichkeiten führen manchmal zu Missverständnissen, daher sollten Sie darauf gefasst sein, dass Begriffe gelegentlich auch anders verwendet werden als wir das hier tun. Insbesondere der Begriff des Mocks oder des Mockings wird oft sehr locker benutzt. 
+
+Wir schauen uns hier verschiedene Formen von Test-Doubles an. Wir werfen einen Blick auf Stub-, Dummy- und Mock-Objekte. Es gibt noch eine ganze Reihe weiterer Arten von Doubles, die wir für den Moment ignorieren. 
+
+Mockito unterscheidet nicht zwischen Stub, Dummy und Mock. Mit `mock(Class)` werden Objekte erzeugt, die in allen Rollen verwendet werden können. 
+
+IMPORTANT: Ob ein Objekt ein Stub, Dummy oder ein Mock ist, erkennen wir an der Verwendung, nicht an der Definition.
+
+=== Stubs
+
+Eine wesentliche Form eines Test-Doubles ist das Stub-Objekt. Das Stub-Objekt haben wir schon gesehen, zum Beispiel in Form des Wetterdienstes, der Kundendatenbank und des gefakten Repositories für Minesweeper Highscores in den beiden Fallstudien. Stubs ersetzen ein kollaborierendes Objekt in einem Test und simulieren das echte Objekt für ein bestimmtes Testszenario. Stubs haben zumeist keine Logik, sondern geben nur vordefinierte Werte zurück, die hart codiert sind.
+
+In unserem Test der Klasse `MarketingCore` haben wir das schon gesehen. Hier wurde in dem Test der Wetterdienst durch einen Lambda Ausdruck ersetzt, der immer ein Wetter-Objekt mit 20°C zurückgegeben hat. Stubs implementieren nur die benötigten Teile eines Interfaces. Stubs dienen dem Ziel der Übernahme der Kontrolle über die Umgebung. Mithilfe eines Stubs können wir dafür sorgen, dass unsere Tests immer deterministische Eingaben von externen Komponenten erhalten. Außerdem können mit Stubs auch Seiteneffekte unterbunden werden. Im Fall des Wetterdienstes verhindern wir zum Beispiel, dass der echte Wetterdienst im Internet abgefragt wird. Das könnte zum Beispiel Kosten reduzieren, falls wir für den Service bezahlen müssen. Ein weiterer Vorteil ist, dass der Test viel schneller und zuverlässiger ist, wenn keine Verbindung zu einem Server beteiligt ist.
+
+Schauen wir uns einmal eine Variante der BBB Anwendung an. Die wesentliche Änderung besteht darin, dass wir vom Repository nicht alle Mailadressen auf einen Rutsch bekommen. Stattdessen bekommen wir immer eine Adresse nacheinander und es gibt eine Methode um herauszufinden, ob alle Adressen abgearbeitet wurden. 
+
+Die Schnittstelle des Repository ist primär aus didaktischen Gründen so gewählt. Die Implementierung des Stubs soll etwas komplexer sein, um die Stärken des Mocking Frameworks zu demonstrieren. Aber es gibt auch in echten Systemen nicht selten Fälle, in denen wir aus Performancegründen tatsächlich nicht alle Datensätze gleichzeitig in den Speicher laden können. In der Regel werden dann die Daten häppchenweise aus der Datenbank geholt. 
+
+Das geänderte Interface sieht so aus:
+[source,java]
+----
+public interface CustomerRepository {
+    String getNextCustomer();
+    boolean iterationCompleted();
+    void addCustomer(String adr);
+    void resetIteration();
+}
+----
+
+Von Hand können wir das Interface zum Beispiel für einen Test mit zwei Mailadressen folgendermaßen implementieren
+
+[source,java]
+----
+class FakeKundenRepository implements CustomerRepository {
+    int n = 0;
+    @Override
+    public String getNextCustomer() {
+        n++;
+        if (n == 1) {
+            return "a@b.de";
+        }
+        else {
+            return "lol@rofl.com";
+        }
+    }
+    @Override
+    public boolean iterationCompleted() {
+        return n == 2;
+    }
+    @Override
+    public void addCustomer(String adr) {
+        // don't care
+    }
+    @Override
+    public void resetIteration() {
+        // don't care
+    }
+}
+----
+
+Das ist recht viel Code für ein Test-Double und es ist je nach Größe der Schnittstelle noch viel schlimmer. Ein Test-Double für ein `List<String>` Objekt hätte beispielsweise 23 Methoden. 
+
+Hier kann uns ein Mocking Framework wie Mockito sehr weiterhelfen. Die statische Methode `mock` bekommt eine Klasse übergeben und gibt uns eine Instanz dieser Klasse, bei der wir für einzelne Methoden Rückgaben spezifizieren können. In unserem Beispiel sähe das so aus:
+
+[source,java]
+----
+CustomerRepository repository = mock(CustomerRepository.class); <1>
+when(repository.getNextCustomer()).thenReturn("a@b.de").thenReturn("lol@rofl.com"); <2>
+when(repository.iterationCompleted()).thenReturn(false, false, true); <3>
+----
+<1> Erzeugen einer Instanz eines `CustomerRepository`. Das Objekt hat kein spezifisches Verhalten. Methoden mit Rückgabetyp geben den typspezifischen Standardwert (0, `false`, `null`) zurück. 
+<2> Spezifiziert das Verhalten der `getNextCustomer` Methode. Beim ersten Aufruf gibt die Methode "a@b.de" zurück, bei jedem weiteren Aufruf "lol@rofl.com".
+<3> Spezifiziert die `iterationCompleted` Methode. Es wird zweimal `false` zurückgegeben und ab dann immer `true`. 
+
+Ob wir mehrmals `thenReturn` verwenden oder eine Liste von Werten übergeben ist egal. 
+
+Mockito stellt auch noch weitere Methoden zum Stubben von Methoden zur Verfügung, zum Beispiel um Exceptions zu generieren.
+
+[source, java]
+----
+when(repository.addCustomer(kunde)).thenThrow(new IOException("Disk full"));
+----
+
+Der große Vorteil der Verwendung eines Mocking Frameworks ist, dass wir nur genau das angeben müssen, was wir tatsächlich für den Test benötigen. 
+
+IMPORTANT: *Verwenden Sie das Mocking Framework nicht, wenn die Implementierung von Hand einfacher ist!* Für unser `WetterDienst` Interface verwenden wir weiterhin einen Lambda Ausdruck! 
+
+=== Dummy
+
+Ein *Dummy* ist ein Objekt, das im Test gar nicht genutzt wird und nur dazu dient, einen Parameter zu befüllen. Im Prinzip ist es also eine Art Stub, das keinerlei Aufrufe ersetzt. Schauen wir uns dazu folgende Klasse an:
+
+[source,java]
+----
+public class Rechnung {
+
+    private final Customer customer;
+    private final List<Rechnungsposition> positionen = new ArrayList<>();
+
+    public Rechnung(Customer customer) {
+        this.customer = customer;
+    }
+
+    public void positionHinzufuegen(Produkt produkt, int anzahl) {
+        positionen.add(new Rechnungsposition(produkt, anzahl));
+    }
+
+    public FastMoney rechnungsbetrag() {
+        FastMoney betrag = FastMoney.of(0, "EUR");
+        for (Rechnungsposition pos :positionen){
+            betrag.add(pos.getPositionPreis());
+        }
+        return betrag;
+    }
+
+    // ... weitere Methoden 
+}
+----
+
+Angenommen, wir möchten die Methode zur Berechnung des Rechnungsbetrags testen, dann müssen wir uns ein Rechnungsobjekt besorgen. Dieses Objekt benötigt bei der Konstruktion eine Instanz von `Customer`. Wie wir im Code sehen, benötigen wir das Objekt nicht, um die Methode `rechnungsbetrag` zu testen.
+
+NOTE: Wir verwenden hier die Bibliothek https://github.com/JavaMoney/jsr354-ri[Moneta], die die Referenzimplementierung des http://javamoney.github.io/[JSR 354 Java Money and Currency API] ist. Sollten Sie Anwendungen entwickeln, die mit Geldbeträgen umgehen sollen, verwenden Sie *niemals* Doubles!
+
+Wie instanziieren wir nun in unserem Test die Klasse `Rechnung`? Ein Weg der in diesem Beispiel funktioniert, ist einfach `null` zu verwenden.
+
+[source,java]
+----
+@Test
+@DisplayName("sollte den Betrag 0 EUR haben, wenn es keine Positionen gibt")
+void test_leere_rechnung() {
+    Rechnung rechnung = new Rechnung(null);
+    FastMoney rechnungsbetrag = rechnung.rechnungsbetrag();
+    assertThat(rechnungsbetrag).isEqualTo(FastMoney.of(0,"EUR"));
+}
+----
+
+Das funktioniert hier, weil der Dummy im Test nicht benutzt werden kann (sonst wäre es kein Dummy). Somit kann es auch nicht zu einer `NullPointerException` kommen. Aber was wäre, wenn der Konstruktor (vernünftigerweise) prüfen würde, dass der Kunde nicht `null` ist?
+
+[source,java]
+----
+public Rechnung(Customer customer) {
+    if (customer == null) {
+        throw new IllegalArgumentException("Customer darf nicht null sein");
+    }
+    this.kunde = kunde;
+}
+----
+
+Nun können wir nicht mehr mit `null` arbeiten und müssen eine echte Instanz des Kunden erzeugen:
+
+[source,java]
+----
+@Test
+@DisplayName("sollte den Betrag 0 EUR haben, wenn es keine Positionen gibt")
+void test_leere_rechnung() {
+    Rechnung rechnung = new Rechnung(new Customer("Dummy McDummyFace"));
+    FastMoney rechnungsbetrag = rechnung.rechnungsbetrag();
+    assertThat(rechnungsbetrag).isEqualTo(FastMoney.of(0,"EUR"));
+}
+----
+
+Hier ist das ein absolut gangbarer Weg, aber die Konstruktion des übergebenen Objektes kann auch komplexer sein, denn der Konstruktor der `Customer` Klasse könnte auch selber Parameter erfordern, die dann auch wieder weitere Parameter erfordern könnten. Außerdem ist es aus dem Test alleine nicht ersichtlich, ob der Parameter "Dummy McDummyFace" eine Rolle spielt oder nicht.
+
+Die Erzeugung eines validen Objektgraphen kann eine ziemlich aufwendige Sache werden. Ein Möglichkeit dem entgegenzuwirken, wäre es ein Interface `Customer` zu definieren, welches wir für den Test so implementieren, dass keine weiteren Parameter benötigt werden. Bei einem Dummy geht das immer, denn wie schon erwähnt kann ein Dummy keine Rolle im Test spielen. Die Implementierung eines Dummys ist also vollkommen irrelevant. Aber das ist natürlich schon ein ziemlicher Aufwand um ein Objekt zu erzeugen, das wir gar nicht für den Test brauchen. 
+
+Wir kennen eigentlich schon die einfache Lösung für das Problem. Wir können einfach einen mit Mockito erzeugten Stub benutzen, bei dem wir kein Verhalten vorgeben.
+
+[source,java]
+----
+@Test
+@DisplayName("sollte den Betrag 0 EUR haben, wenn es keine Positionen gibt")
+void test_leere_rechnung() {
+    Rechnung rechnung = new Rechnung(mock(Customer.class));
+    FastMoney rechnungsbetrag = rechnung.rechnungsbetrag();
+    assertThat(rechnungsbetrag).isEqualTo(FastMoney.of(0,"EUR"));
+}
+----
+
+Der Stub verlangt keine Parameter von uns und hat kein Verhalten, ist aber nicht `null` und funktioniert daher auch, wenn die Eingabe geprüft wird.
+
+Wie genau funktioniert das eigentlich? Bisher haben wir immer Interfaces verwendet, aber `Customer` ist eine normale Klasse. Mockito kann tatsächlich sowohl Interfaces als auch Klassen substituieren. Bei Klassen wird dazu ein Objekt erzeugt, das von der entsprechenden Klasse erbt und alle Methoden überschreibt. Vererbung funktioniert nicht, wenn die Klassen final sind. Und tatsächlich, wenn `Kunde` als `final` deklariert wird bekommen wir von Mockito einen Fehler. 
+
+Seit Mockito 2 gibt es aber einen optional einschaltbaren Modus, der bei Klassen nicht mit Vererbung arbeitet, sondern diese zur Laufzeit redefiniert. Dadurch können auch finale Klassen benutzt werden. Der Modus wird dadurch eingeschaltet, dass wir im Klassenpfad eine Datei `mockito-extensions/org.mockito.plugins.MockMaker` anlegen und in diese Klasse die Zeile `mock-maker-inline` schreiben. In einem Gradle Projekt ist der richtige Platz für die Datei also `src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker`.
+
+NOTE: Mockito erzeugt Objekte zur Laufzeit mithilfe von https://bytebuddy.net/[Byte Buddy]. Für unsere Zwecke müssen wir aber nicht genau nachvollziehen, wie Mockito unter der Haube arbeitet. Es reicht vollkommen aus, wenn wir es anwenden können.
+
+=== Mock 
+
+Auch ein Mock-Objekt haben wir bereits in der Fallstudie kennengelernt. Mock-Objekte können wie Stubs zur Kontrolle der Umgebung benutzt werden und auch Seiteneffekte unterbinden. Das Unterbinden eines Seiteneffekts haben wir in der Anwendung gesehen; der MailSender-Mock schickt keine Mails an die Kunden. Der Unterschied zu einem Stub besteht darin, dass Mock-Objekte auch zum Assert Schritt beitragen. 
+
+Mit Hilfe von Mocks wird die Interaktion zwischen Komponenten verifiziert. In unserem Fall haben wir den MailSender durch eine Implementierung ersetzt, die die Aufrufe der `sendMail` Methode mitzählt. Dadurch können wir in unserer Assertion herausfinden, ob die Marketing Anwendung tatsächlich versucht Mails zu verschicken.
+
+IMPORTANT: Mocks nehmen an dem Assert Schritt teil. 
+
+Schauen wir uns einen händisch geschriebenen Mock für unser `MailSender` Interface an
+
+[source, java]
+----
+class FakeMailSender implements MailSender {
+    public ArrayList<String> mails = new ArrayList<>();
+    @Override
+    public void sendMail(String adr) {
+        mails.add(adr);
+    }
+}
+----
+
+Ein dazu passender Test könnte folgendermaßen aussehen:
+[source, java]
+----
+@Test
+@DisplayName("soll bei einer Temperatur über 30 Grad Mails verschicken")
+public void temperatureIsHot_sendMails() {
+    
+    // Arrange 
+    Thermometer thermometer = () -> 32;
+    CustomerRepository repository = mock(CustomerRepository.class);
+    when(repository.getNextCustomer()).thenReturn("a@b.de").thenReturn("lol@rofl.com");
+    when(repository.iterationCompleted()).thenReturn(false, false, true);
+    FakeMailSender mailSender = new FakeMailSender();
+    MarketingApp app = new MarketingApp(thermometer, repository, mailSender);
+    
+    // Act 
+    app.doMarketing();
+
+    // Assert
+    assertThat(mailSender.mails).containsExactly("a@b.de","lol@rofl.com");
+}
+----
+
+Der Test ist nicht schrecklich (auch, weil das Repository schon mit Mockito erzeugt wird). In dem Test prüfen wir die Interaktion zwischen der Marketing-Anwendung und der Komponente, die Mails verschickt indirekt, indem wir den Zustand des Test-Doubles inspizieren. Mit Mockito können wir die Tatsache, dass wir hier eigentlich eine Interaktion prüfen, expliziter machen. 
+
+[source, java]
+----
+@Test
+@DisplayName("soll bei einer Temperatur über 30 Grad Mails verschicken")
+public void temperatureIsHot_sendMails() {
+    // Arrange 
+    Thermometer thermometer = () -> 32;
+    CustomerRepository repository = mock(CustomerRepository.class);
+    when(repository.getNextCustomer()).thenReturn("a@b.de").thenReturn("lol@rofl.com");
+    when(repository.iterationCompleted()).thenReturn(false, false, true);
+    MailSender mailSender = mock(MailSender.class);
+    MarketingApp app = new MarketingApp(thermometer, repository, mailSender);
+    
+    // Act
+    app.doMarketing();
+
+    // Assert
+    InOrder order = inOrder(mailSender); 
+    order.verify(mailSender).sendMail("a@b.de");
+    order.verify(mailSender).sendMail("lol@rofl.com");
+    verifyNoMoreInteractions(); 
+}
+----
+
+Von Mockito erzeugte Objekte zeichnen alle Aufrufe ihrer Methoden auf. Diese Aufzeichnung wird verwendet, um die Interaktionen mit dem Objekt zu überprüfen. In dem Beispiel prüfen wir, dass die Methode `sendMail` mit den beiden Adressen in der exakten Reihenfolge aufgerufen wird und sonst keine weitere Interaktion mit dem Objekt stattfindet. 
+
+WARNING: Obwohl wir die Interaktionen sehr präzise prüfen können, sollten wir uns sehr überlegen, ob das hier eine so gute Idee ist. Ist es wirklich wichtig für uns, dass die Mailadressen exakt in dieser Reihenfolge übergeben werden? 
+
+Hier ist es vermutlich besser, die exakte Reihenfolge nicht festzulegen. Es könnte ja zum Beispiel sein, dass wir uns später entscheiden die Mails parallel mithilfe mehrerer Threads zu verschicken. Das würde potenziell zu unterschiedlichen Reihenfolgen führen. Wir sollten hier `InOrder` besser weglassen und nur dann verwenden, wenn die Reihenfolge für uns wirklich relevant ist.
+
+[source, java]
+----
+verify(mailSender).sendMail("a@b.de");
+verify(mailSender).sendMail("lol@rofl.com");
+verifyNoMoreInteractions(mailSender);
+----
+
+Nun sollten wir noch darüber nachdenken, ob wir wirklich unbedingt sagen wollen, ob außer den zwei Aufrufen von `sendMail` keinerlei weitere Interaktionen stattfinden, oder ob das nicht auch zu strikt ist. Das ist hier diskutierbar, aber wir sollten so eine Assertion auf keinen Fall in jedem Testfall aufschreiben. 
+
+Stellen Sie sich vor wir haben das in allen Tests geschrieben und wir verwenden später eine andere Implementierung, die es erfordert, die Mailsende-Komponente am Anfang zu initialisieren. Dann müssen wir alle Tests ändern. Wie auch immer also unser Urteil lautet, `verifyNoMoreInteractions(mailSender)` sollten wir optimalerweise nur in einem Testfall haben, der genau diese Eigenschaft prüft. 
+
+IMPORTANT: *Wir sollten die Verifikation von Interaktionen auf das für den Testfall absolut Notwendige reduzieren!* Wir sollten Dinge nach Möglichkeit nicht doppelt testen. Das macht den Unterschied aus zwischen einem Sicherheitsnetz dass uns vor dem Absturz bewahrt und einem Netz, in dem wir uns verfangen. 
+
+Mockito hat eine ganze Reihe von Optionen zur Verifikation. Zum Beispiel die sogenannten Matcher, mit denen wir die Parameter von Aufrufen unscharf beschreiben können. Also zum Beispiel, falls uns gar nicht interessieren würde, mit welcher Mailadresse die `sendMail` Methode aufgerufen wird, könnten wir das so ausdrücken 
+
+[source, java]
+----
+verify(mailSender).sendMail(any()); <1>
+verify(mailSender).sendMail(anyString()); <2>
+verify(mailSender).sendMail(any(String.class)); <3>
+----
+<1> Jeder Type, den der Compiler als Parameter akzeptieren würde (inklusive null), ist hier ok. 
+<2> Für die Java Standard-Typen (auch Collections) gibt es fertige Matcher. Hier ist `null` ausgeschlossen.  
+<3> Wir können den Type auch konkret festlegen. Auch hier ist `null` ausgeschlossen.
+
+Matcher können auch für das Stubbing verwendet werden, um die Eingabeparameter unscharf zu spezifizieren. 
+
+[source, java]
+----
+when(repository.save(any())).thenThrow(new IOException("Disk full"));
+----
+
+Es gibt auch noch die Möglichkeit die Anzahl von Aufrufen mit Hilfe eines `VerificationMode` festzulegen, zum Beispiel:
+
+[source, java]
+----
+verify(mailSender, times(2)).sendMail(anyString());
+verify(mailSender, never()).sendMail(anyString()); 
+verify(mailSender, atLeastOnce()).sendMail(anyString());
+----
+
+Wir wollen in einem Test nur einen Sachverhalt prüfen, also zum Beispiel die Interaktion mit einer Komponente. Wenn wir mehr als ein Mock-Objekt in einem Test verwenden, ist das ein Hinweis darauf, dass mehr als ein Sachverhalt getestet wird. Stub-Objekte können aber zusätzlich zu einem Mock verwendet werden.  
+
+NOTE: Wenn wir mehr als ein Mock-Objekt in einem Test verwenden, sollten wir hinterfragen, ob wir wirklich nur einen Sachverhalt testen. 
+
+*Leitfragen/Aufgaben:*
+
+* Wir wollen eine Klasse testen, die folgendermaßen aussieht:
++
+[source,java]
+----
+public class Consumer {
+	private Queue<String> queue;
+
+	public Consumer(Queue<String> queue) {
+		this.queue = queue;
+	}
+
+	public String consume() {
+		String name = queue.poll();
+		return name != null ? "Hello " + name : "";
+	}
+}
+----
++
+Ein Test für die Klasse ist auch schon fertig:
++
+[source, java]
+----
+@Test
+public void singleValueInQueue() {
+	Consumer consumer = new Consumer(new FakeQueue("world"));
+	assertThat(consumer.consume()).isEqualTo("Hello world"));
+}
+----
++
+Was ist das Problem, wenn Sie versuchen eine Implementierung von `FakeQueue` von Hand zu schreiben? Versuchen Sie es zum Vergleich einmal mit Mockito.
+
+* Lassen Sie die Tests im Projekt `rechnung` laufen. Ändern Sie die Klasse `Customer` so, dass sie `final` ist (also nicht mehr von ihr geerbt werden kann) und bringen Sie dann `RechnungTest` wieder zum laufen ohne ein Interface zu schreiben.
+
+* "Jeder Mock ist auch ein Stub!" Ist diese Aussage korrekt?
+
+*Zusatzmaterial:*
+
+- Vierteilige Blogserie https://www.endoflineblog.com/testing-with-doubles-or-why-mocks-are-stupid-part-1[Testing with Doubles, or why Mocks are Stupid] von Adam Ruka
+
+- https://katalog.ulb.hhu.de/Record/9947401256706443[xUnit Test Patterns: Refactoring Test Code, Gerard Meszaros]
+
+== Java Upgrade
+
+=== Die Date und Time API
+
+Vor Java 8 gab es die Klassen `java.util.Date` und `java.util.Calendar`, die im Umgang einigermaßen scheußlich waren. Der Umgang war so grauenvoll, dass die meisten Entwickler:innen statt der in Java vorhandenen Klassen, die Bibliothek Joda Time verwendet haben. Mit Java 8 kam ein neuer Satz von Klassen in dem Paket `java.time`, die den Umgang mit Datum und Zeit massiv verbessert haben. 
+
+Schauen Sie sich das Video https://youtu.be/OIg9lNpMJew[Java 8 Date and Time API] von Jim Gough an. Der Code ist unter https://github.com/jpgough/JavaTimeLab verfügbar.
+
+*Leitfragen/Aufgaben:*
+
+* Schreiben Sie eine Methode, die das aktuelle Datum in der Form `Mittwoch, 26.05.` ausgibt.
+
+* Schreiben Sie eine Methode, die ein Datum als String in der Form `23.05.21 02:00` einliest und ein Objekt vom Typ `LocalDateTime` zurückgibt.
+
+* Jens hat Urlaub in Japan gemacht und fliegt am 09.08.2021 um 16:30 Uhr Ortszeit von Tokyo nach Frankfurt. Der Flug dauert 12 Stunden und 10 Minuten. Die Zugfahrt von Frankfurt nach Düsseldorf dauert mit Zollformalitäten, Warten auf das Gepäck und Transfer zum Bahnhof insgesamt 3 Stunden und 26 Minuten. An welchem Tag und zu welcher Uhrzeit (Ortszeit Düsseldorf) kommt Jens in Düsseldorf an? Welcher Tag und wie spät ist es dann in Tokyo? Schreiben Sie ein Programm, dass die Uhrzeiten ausrechnet. 
+
+* Schreiben Sie eine Methode, die zwei Objekte vom Typ `LocalDate` übergeben bekommt und alle Freitage zwischen den beiden eingegebenen Daten, die auf den 13. eines Monats fallen, ausgibt.
+
+* Implementieren Sie eine Methode, die eine Kalenderwoche als Eingabe bekommt und berechnet, wann Sie sich für die praktischen Übungen, die in der Kalenderwoche stattfinden, anmelden müssen (also am Donnerstag in der Vorwoche).
+
+*Zusatzmaterial:*
+
+* https://docs.oracle.com/javase/tutorial/datetime/iso/index.html[Java Date/Time Tutorial] von Oracle
+
+
+=== Default Methoden
+
+Seit Java 8 können wir in Interfaces echte Methoden mit einer Implementierung schreiben. Der Grund für die Einführung war, dass es notwendig war neue Methoden in bestimmten Interfaces einzuführen, damit z.B. die Stream API richtig funktioniert. Allerdings sollte die Kompatibilität zu bestehenden `.class` Dateien erhalten bleiben. 
+
+Ein Beispiel für eine solche Methode ist `spliterator` im Interface `List`. Die Methode wird in der Stream API verwendet um Listen parallel zu iterieren.  
+
+Wäre die Methode ganz normal als Interface Methode in das `List` Interface eingeführt worden, würden Implementierungen von Listen, die eine ältere Version von `List` verwenden, nicht mehr kompatibel sein und wir müssten sie ergänzen und rekompilieren. 
+
+Default Methoden werden mit dem Schlüsselwort `default` gekennzeichnet und dann direkt im Interface implementiert. 
+
+[source, java]
+----
+public interface List<E> extends Collection<E> {
+
+    default Spliterator<E> spliterator() {
+        if (this instanceof RandomAccess) {
+            return new AbstractList.RandomAccessSpliterator<>(this);
+        } else {
+            return Spliterators.spliterator(this, Spliterator.ORDERED);
+        }
+    }
+
+    // ...
+
+}
+----
+
+Wenn eine Klasse zwei Interfaces `A` und `B` importiert, die identische `default` Methoden `foo` haben, dann muss die Klasse die Methode selber überschreiben. Wir können die Implementierungen der Methoden der Interfaces mit `A.super.foo()` bzw. `B.super.foo()` aufrufen.
+
+*Leitfragen/Aufgaben:*
+
+* Im Projekt `default_methods` ist im Package `stack` ein Interface `MyStack`, das von der Klasse `Main` verwendet wird. Die konkrete Implementierung `LinkedListStack` stammt aus dem `stacklib.jar` File. Eine Source Version der Klasse haben wir leider nicht. Erweitern Sie das Interface um eine Methode `E peek()`, die das oberste Element vom Stack liefert, aber nicht entfernt. Das Programm muss am Ende mit der mitgelieferten `LinkedListStack` Klasse funktionieren.
+
+* Im Projekt `default_methods` ist im Package `doppelt` eine Klasse `C`, die das Interface `A` implementiert. Ändern Sie `C` so, dass nicht nur `A`, sondern auch `D` implementiert wird. Die `default` Methoden aus beiden Interfaces sollen ausgeführt werden. 
+
