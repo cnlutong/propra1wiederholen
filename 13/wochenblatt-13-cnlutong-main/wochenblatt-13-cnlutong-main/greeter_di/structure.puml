@@ -1,0 +1,9 @@
+@startuml
+class Greeter {
+ + String greet(String name)
+}
+class GreeterApplication
+
+GreeterApplication --> Greeter
+
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+class MainTransitive
+
+MainTransitive --> Level1A
+MainTransitive --> Level1B
+Level1A --> Level2A
+Level1A --> Level2B
+
+@enduml

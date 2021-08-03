@@ -1,0 +1,203 @@
+= Professionelle Softwareentwicklung: Woche 13
+:icons: font
+:icon-set: fa
+:stem: latexmath
+:source-highlighter: rouge
+:experimental:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+== Begrüßung und Organisatorisches 
+Schauen Sie sich das https://youtu.be/mFfD_b6iDoc[Begrüßungsvideo] an.
+
+=== Anmeldung zur neunten praktischen Übung
+
+Die neunte und letzte praktische Übung findet in der nächsten Woche (12.07.2021 bis 16.07.2021) statt.
+
+Die Anmeldefrist auf https://pure.mops.cs.hhu.de endet am 08.07.2021, 14:30 Uhr.
+
+=== Anmeldung zur Klausur
+
+Die Anmeldung zur ersten Klausur ist über das Studierendenportal möglich. Wir bitten Sie, sich möglichst frühzeitig anzumelden, da uns das bei der Raumplanung und dem Drucken der Klausuren sehr hilft. In diesem Semester gilt das Nichterscheinen zur Klausur noch als gültiger Rücktritt von der Klausur.
+
+
+== Aufgabe 1: Spring und Spring Boot
+
+Im Praktikum werden wir eine etwas größere Anwendung mit dem Spring Framework schreiben, die neben dem fachlichen Code, der das eigentliche Problem löst, auch technischen Code enthält. Technischer Code ist der Code, der sich mit fachunabhängigen Aspekten befasst, wie zum Beispiel dem Ausliefern von Webseiten oder dem Zugriff auf Datenbanken. Um uns hier viel Arbeit einzusparen, verwenden wir ein Framework.
+
+WARNING: Spring ist ein sehr umfangreiches Framework, dass wir nur oberflächlich behandeln können. Wir werden uns nur mit den Themen befassen, die Sie im Praktikum im nächsten Semester vermutlich benötigen werden. Und selbst diese Themen werden wir nicht erschöpfend behandeln (können).
+
+== Spring (Boot)
+
+Schauen Sie sich das Video zum Thema https://youtu.be/rISQtQ4QFOE[Einführung in Spring] an. Das Spring Framework besteht aus einer Vielzahl von Modulen, die ein breites Spektrum von technischen Problemen, die in großen Geschäftsanwendungen häufig auftreten, lösen. Die Konfiguration der einzelnen Module in Spring war aber nicht ganz einfach, es musste immer eine funktionierende Kombination gefunden werden und einzelnen Module zu aktualisieren konnte eine Herausforderung sein. Seit 2014 ist die Konfiguration von Spring durch Spring Boot deutlich erleichtert worden. Die Macher von Spring Boot beschreiben es auf ihrer https://spring.io/projects/spring-boot[Webseite] folgendermaßen:
+
+[quote. Spring Boot Dokumentation]
+____
+Spring Boot makes it easy to create stand-alone, production-grade Spring based Applications that you can "just run". We take an opinionated view of the Spring platform and third-party libraries so you can get started with minimum fuss. Most Spring Boot applications need minimal Spring configuration.
+____
+
+Obwohl wir theoretisch das Gradle Buildfile für eine Spring Boot Anwendung von Hand schreiben könnten, ist es einfacher, einen Konfigurator zu verwenden. Dafür gibt es unterschiedliche Möglichkeiten.
+
+* Es gibt die https://start.spring.io[Spring Initializr] Webseite, auf der die einzelnen Dependencies ausgewählt werden können und dann ein ZIP File heruntergeladen werden kann, in dem ein frisches Projekt enthalten ist.
+* Die Ultimate Edition von IntelliJ hat einen eingebauten Wizard für Spring Boot Projekte. Als Studierende können Sie die Ultimate Edition https://www.jetbrains.com/community/education/#students[kostenlos] erhalten.
+* Für Eclipse bietet es sich an, die https://spring.io/tools[Spring Tools] herunterzuladen, das ist eine für Spring angepasste Eclipse Version.
+
+NOTE: Die Wizards in den IDEs verwenden auch die Webseite, laden das ZIP File dann automatisch herunter und entpacken es.
+
+=== Dependency Injection
+
+Im Video haben Sie bereits gesehen, dass der Kern von Spring ein Dependency Injection Framework ist, welches die Verdrahtung von Objekten übernimmt. Anstatt mit `new` Objekte zu erzeugen, werden die Objekte, die "Spring Beans" genannt werden, vom Framework erzeugt und bekommen ihre Dependencies injiziert.
+
+Es gibt zwei wesentliche Arten dem Spring Framework anzuzeigen, welche Klassen injiziert werden können. Zum einen können wir die Implementierung mit der Annotation `@Component` markieren, zum anderen können wir in einer, mit `@Configuration` annotierten Klasse, eine Methode schreiben, die eine Spring Bean (also ein automatisch injizierbares Objekt) zurückgibt und diese Methode mit `@Bean` annotieren.
+
+Angenommen, die Klasse `Foo` soll eine Spring Bean sein. Dann können wir also entweder die Klasse annotieren:
+
+[source, java]
+----
+@Component
+public class Foo {
+  // ...
+}
+----
+
+oder wir können in einer Konfigurationsklasse eine `@Bean` annotierte Methode schreiben:
+
+[source, java]
+----
+@Configuation
+public class MyConfig {
+
+ @Bean
+ public Foo createFoo() {
+   Foo f = new Foo();
+   // Hier können wir noch weitere Methoden aufrufen
+   return f;
+ }
+
+}
+----
+
+NOTE: Die automatisch erstellte Startklasse ist mit `@SpringBootApplication` annotiert. Die Klasse ist automatisch auch eine Konfigurationsklasse, wir können dort also auch `@Bean` Methoden schreiben. Die `@SpringBootApplication` Annotation gibt es in der Regel nur einmal pro Anwendung.
+
+Wir haben in dem Video auch schon gesehen, wie Injection benutzt wird. Wenn eine Spring Bean vom Framework erzeugt wird, werden die Konstruktorparameter ebenfalls erzeugt und dann injiziert. In unserem Beispiel hatten wir die Klasse `MyRunner`, die vom Framework selber angefordert wurde, da sie das `CommandLineRunner` Interface implementiert. Diese Klasse hatte einen Konstruktor, der eine Instanz von `Greeter` benötigte. Das Framework hat nach einer entsprechenden Klasse gesucht, diese instanziiert und den Konstruktor von `MyRunner` mit der `Greeter`-Instanz aufgerufen. Wenn `Greeter` selber noch Abhängigkeiten gehabt hätte, dann wären diese auch aufgelöst worden.
+
+Es gibt jetzt noch einige offene Fragen, die wir klären wollen:
+
+. Wozu brauchen wir eigentlich die `@Bean` Annotation?
+. Was passiert, wenn wir mehr als einen Konstruktor haben? Woher weiß das Framework welcher Konstruktor verwendet werden muss?
+. Ist Konstruktor Injektion die einzige Möglichkeit?
+. Was passiert, wenn mehr als eine Klasse für eine Injektion infrage kommen? Also zum Beispiel, wenn wir zwei Klassen haben, die mit `@Component` annotiert sind und das `CommandLineRunner` Interface implementieren?
+. Können wir zirkuläre Abhängigkeiten bekommen?
+. Wenn wir eine Dependency mehrfach injizieren, bekommen wir dann frische Instanzen oder immer dieselbe Instanz?
+
+Schauen Sie sich dazu die Videos https://youtu.be/sFKm6Nrhc8M[Dependency Injection mit Spring im Detail] und https://youtu.be/pU3jDRmqmA4[Die `@Scope` Annotation] an.
+
+*Leitfragen/Aufgaben:*
+
+* Eine Bean benötigt einen Stream mit den Zahlen von 1 bis 10. Wie können Sie Spring konfigurieren, sodass der Stream injiziert wird?
+
+* Annotieren Sie den Konstruktor der Klasse `DependencyWithDefaultConstructor`, der einen String als Parameter erwartet mit `@Autowired` und bringen Sie das Programm zum Laufen. Welchen String Sie injizieren können Sie selber wählen.
+
+* Ergänzen Sie diesen Konstruktor um einen zweiten Parameter vom Typ `String`. Beide Strings sollen konkateniert in der Variable `msg` gespeichert werden. Injizieren Sie zwei unterschiedliche Strings.
+
+* Können wir Konstruktor-, Field- und Setter-Injection mischen? Machen Sie Experimente.
+
+* Können wir in beliebigen Methoden Dependency Injection verwenden? Falls nein, wo funktioniert es?
+
+* Wir wollen die Anwendung zur Kundensegmentierung auf Wochenblatt 7 mit Spring Boot umsetzen.
+** Erzeugen Sie ein frisches Spring Boot Projekt (z.B. mit dem Initializr)
+** Implementieren Sie die notwendigen Komponenten der Marketing-Anwendung in dem Spring Boot Projekt (z.B. durch Kopieren von Code-Teilen)
+** Sorgen Sie dafür, dass die Komponenten der Anwendung mithilfe von Spring injiziert werden. Die Anwendung soll zunächst `AgeSegmentation` verwenden, es soll aber einfach sein, die Segmentierung auszutauschen.
+
+
+*Zusatzmaterial:*
+
+- https://katalog.ulb.hhu.de/Record/9947401472906443[Spring Boot 2] von Michael Simons
+
+- https://www.youtube.com/watch?v=z8LEgR7WyLs&feature=emb_err_woyt[Die Magie hinter Spring Boot Startern] von Michael Simons
+
+- https://www.youtube.com/watch?v=Q_P28p7XsbQ[Spring Tips: Programmatic Bean Registration in Spring Framework 5.0] von Josh Long
+
+
+== Aufgabe 2: Externe Informationen und Konfiguration
+
+Gelegentlich werden in größeren Anwendungen von außen vorgegebene Werte (Properties), zum Beispiel zur Konfiguration, benötigt. Solche Werte können aus verschiedenen Quellen stammen, zum Beispiel aus Umgebungsvariablen des Betriebssystems, aus Java Properties, die wir dem Programm mitgeben können, aus Spring Konfigurationsdateien und einigen anderen Quellen.
+
+Einen externen Wert können wir injizieren, indem wir den entsprechenden Parameter mit `@Value` annotieren. Die `@Value` Annotation benötigt einen Ausdruck, der den Namen der Property angibt.
+
+NOTE: Im Prinzip kann Value einen Ausdruck in der Spring Expression Language (SpEL) verarbeiten, in den allermeisten Fällen verwenden wir hier aber den Zugriff auf eine Property.
+
+Greifen wir einmal exemplarisch in einem Konstruktor auf die `PATH` Variable des Betriebssystems zu.
+
+[source, java]
+----
+public PathAccess(@Value("${PATH}") String path) {
+  System.out.println("OS Path: " + path);
+}
+----
+
+Oft wird auch auf eine spezielle Datei `src/main/resources/application.properties` zugegriffen. Diese Datei wird an verschiedenen Stellen verwendet, um Konfigurationen abzuspeichern. Diese Konfiguration wird von Spring selber verwendet, um gewisse Features zu konfigurieren. Wir können dort aber auch beliebige eigene Werte hineinschreiben.
+
+Ein Beispiel für eine eigene Property könnte so aussehen. Zunächst die Datei `application.properties`
+
+[source]
+----
+eine.eigene.property=42
+----
+
+Und die Verwendung der Property ist in der Klasse `SomeComponent`
+
+[source, java]
+----
+@Component
+public class SomeComponent {
+
+  @Value("${eine.eigene.property}")
+  private int theAnswer;
+  
+  public void ping() {
+    System.out.println("Ping from "+this);
+    System.out.println("The Answer is: "+theAnswer);
+  }
+
+}
+----
+
+Ein Beispiel für eine Konfiguration von Spring ist beispielsweise das Abschalten des Banners. Das geschieht mit der Property `spring.main.banner-mode`, die wir auf `off` setzen können, die Standardeinstellung ist `console`.
+
+NOTE: Alternativ zu einer `properties` Datei können wir auch das `YAML` Format verwenden.
+
+
+*Leitfragen/Aufgaben:*
+
+- Schreiben Sie in eine Spring Boot Anwendung, die den Systempfad und einen beliebigen eigenen Eintrag in der `application.properties` Datei über `@Value` injiziert und ausgibt.
+
+- In dem Beispiel oben haben wir Field Injection gesehen. Versuchen Sie es auch einmal mit Konstruktor Injection.
+
+- Beim Start der Anwendung wird folgendes Banner ausgegeben:
++
+[source]
+----
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.4.0)
+----
++
+Finden Sie einen Weg, das Banner zu ändern in ein Banner, das in ASCII Art `Propra I` ausgibt.
++
+TIP: Das geht auch ohne Änderungen in der `application.properties` Datei.
+
+
+*Zusatzmaterial:*
+
+- Dokumentation zur https://docs.spring.io/spring-boot/docs/1.5.6.RELEASE/reference/html/boot-features-external-config.html[externalisierten Konfiguration]
+
