@@ -1,0 +1,186 @@
+= Softwareentwicklung im Team Übung: Stream API
+:icons: font
+:icon-set: fa
+:source-highlighter: rouge
+:experimental:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+== Funktionale Programmierung in Java
+
+Diese Woche wollen wir uns mit der Stream API beschäftigen und mit möglichst kleinen Funktionen
+unsere Daten transformieren.
+
+=== Zum warm werden
+
+Zahlen in einer `range` erzeugen:: `IntStream.range(1, 10)` erzeugt einen Stream
+von Integern, welcher Zahlen von 1 bis 9 erzeugt.
+
+Mit der Funktion `forEach` können wir einzelne Elemente konsumieren und eine Funktion darauf anwenden:
+
+[source,java]
+----
+IntStream.range(1, 10)
+    .forEach(i -> System.out.println(i));
+----
+
+Versuchen Sie über `IntStream` eine Liste an Integer-Objekten zu sammeln.
+
+NOTE: Hinweis: Verwenden Sie `boxed()`. `IntStream` erweitert lediglich `BaseStream` und nicht `Stream`.
+
+=== Eigene Stream-API Facilities
+
+Man kommt ab und zu in die Situation, dass man eigene Versionen der Stream API Facilities schreiben muss.
+
+Wir wollen uns zur Übung einmal einen eigenen `Collector` schreiben. `Collector` mag zunächst
+schwierig aussehen. Wir sollten uns allerdings ins Gedächtnis ruft, dass wir
+im Prinzip nur ein Reduce in einem veränderlichen Container durchführen und einen konkreten Wert zurückgeben.
+
+Ziel ist es die Konfigurationsdatei `my_config.yml` einzulesen und in eine HashMap zu überführen. Nehmen Sie vereinfachend an, dass die Schlüssel-Wert-Paare einfach mit einem `:` getrennt sind, so wie es aktuell in der Datei der Fall ist.
+
+Wir können einen `Collector` implementieren, indem wir `Collector.of` mit passenden Argumenten aufrufen, oder direkt die `collect` Methode mit den drei passenden Funktionen füllen.
+
+1. `Supplier`: Eine Funktion, welche (hier) eine neue Collection erzeugt, die wir zum Sammeln der Daten nutzen können.
+2. Accumulator: Ein `BiConsumer`, welcher als erstes Argument einen Akkumulator und als zweites Argument das zu akkumulierende Element erhält.
+3. Combiner: Ein `BiConsumer`, welcher zwei Teilergebnisse erhält und ins erste Teilergebnis kombiniert.
+
+* Implementieren Sie einen Collector, welcher den Inhalt unserer `my_config.yml` Datei Zeile für Zeile in eine `HashMap<String,String>` sammelt. Geben Sie die Map aus.
+
+
+[TIP]
+====
+Sie können um die key value Pärchen zu ermitteln, folgenden Code nutzen:
+[source,java]
+----
+  var keyValue = elem.split(":");
+  var key = keyValue[0].trim();
+  var value = keyValue[1].trim();
+----
+====
+
+==== Weitere interessante Funktionen
+
+Es gibt viele Stream-Funktionen, die Sie mit der IDE kennenlernen können.
+Das Arbeiten mit Streams kann einen Großteil ihrer Arbeit ersetzen.
+Versuchen Sie ein Gefühl dafür zu bekommen welche Stream-Operationen
+besonders nützlich sind und ihnen in der alltäglichen Arbeit helfen können.
+
+=== Arbeiten mit echten Daten
+
+In dem Beispielprojekt finden Sie eine `punkte.csv`-Datei, welche fiktive
+Klausurergebnisse beinhaltet. Diese Datei soll nun eingelesen und ausgewertet
+werden.
+
+==== Aufgaben
+
+* Lesen Sie die Datei mit folgendem Befehl ein:
+
+[source, java]
+----
+final List<String> zeilen = Files.readAllLines(Paths.get("punkte.csv"));
+----
+
+* Ermitteln Sie die Anzahl der Zeilen über die Stream API und geben Sie sie auf der Konsole aus.
+* Es handelt sich hierbei um Daten, die mit einem Komma separiert sind. Bringen
+  Sie die Daten in eine verwertbare Struktur, indem Sie die einzelnen Zeilen
+  (Strings) nach einem Komma splitten. Die Funktionen `map` und `split()` können
+  hierbei helfen. Beispiel zum Teilen eines Strings bei Kommata:
+
+[source, java]
+----
+final String[] foo = "F,o,o".split(",");
+----
+
+Im String[] `foo` befinden sich dann die Strings "F", "o" und "o".
+
+* Geben Sie die einzelnen Zeilen aus
+* Geben Sie nun nur die Namen der Studierenden aus.
+* Berechnen Sie, welche Studierenden mindestens 50 Punkte in einer Klausur
+  hatten.
+* Seien Sie kreativ und analysieren Sie die Daten. Wie viele Studierenden sind
+  durchgefallen? Wie viele Studierenden haben die Hauptklausur geschrieben?
+
+==== Weitere Datenverarbeitung
+
+Wir haben eine zweite Datei `studis.txt`, welche wieder (natürlich keine echten) Studierendendaten
+enthält. Das Format hier ist `Vorname Nachname Fach Übungspunkte Klausurergebnis_in_Prozent`.
+Wie Sie die Aufgaben Lösen ist Ihnen frei gelassen, aber probieren
+Sie möglichst verschiedene Ansätze mit der Stream API aus.
+
+* Anhand von der Datei `studis.txt`:
+
+** Zählen Sie die Zeilen und geben Sie sie aus.
+** Finden Sie alle Informatiker und geben Sie sie aus.
+Versuchen Sie eine Lösung mit `filter` und eine mit `groupingBy` zu finden.
+** Geben Sie nur die Namen aus.
+** Benennen Sie den Studiengang "Informationswissenschaften" in
+"Computerlinguistik" um und geben Sie alle Zeilen aus.
+
+NOTE: Für die unten stehenden Aufgaben haben wir den Studiengang noch nicht umbenannt.
+
+* Zählen Sie nur die Informatiker
+* Geben Sie die Namen aller Mathematiker aus
+* Geben Sie nur eine sortierte Liste der Fächer aus
+* Geben Sie jedes Fach nur einmal aus
+
+----
+Anderer
+Informatik
+Informationswissenschaften
+Mathematik
+Physik
+----
+
+* Zählen Sie die Häufigkeit jedes Fachs
+----
+  22 Anderer
+ 359 Informatik
+  73 Informationswissenschaften
+  33 Mathematik
+  46 Physik
+----
+* Sortieren Sie die Fächer in absteigender Reihenfolge, nach der Häufigkeit
+----
+ 359 Informatik
+  73 Informationswissenschaften
+  46 Physik
+  33 Mathematik
+  22 Anderer
+----
+
+* Finden Sie die Gesamtzahl der Studierenden, welche die Zulassung erhalten (Punkte sind > 300)
+* Geben Sie die Summe aller Punkte der Studierenden aus, welche die Zulassung
+erhalten haben.
+
+
+=== ZUSATZ:
+* Implementieren Sie einen Collector, welcher den GCD einer Liste an Integern berechnet.
+
+NOTE: Implementieren Sie GCD nicht selbst. Wandeln Sie alle `Integer` in `BigInteger`,
+mittels der statischen Methode `valueOf` um und nutzen Sie die eingebaute `gcd` Methode.
+
+IMPORTANT: Sie müssen für einen Collector den Wert in den Sie akkumulieren verändern.
+Java Integer sind Immutable, daher gibt es hier Probleme. Nutzen Sie einen ähnlichen Trick
+wie die Standard-Implementierung von `summingInt` und verwenden Sie ein `AtomicInteger`, welches
+sich sicher verändern lässt. `summingInt` nutzt aus performance Gründen sogar ein Integer array.
+
+
+== Tool der Woche: enhancd (und ähnliche Tools)
+
+Wieder einmal geht es um die Shell. Wir können darin sehr schnell und effizient
+arbeiten. Und das lässt sich noch verbessern, wenn wir schneller von einem Ort
+in den nächsten springen können. Tools wie
+https://github.com/b4b4r07/enhancd[enhancd] helfen es uns per Fuzzy-Search
+zuletzt aufgerufene Orte schnell zu finden und bieten uns mit automatischen
+Vorschlägen der passenden Orte eine noch schnellere Möglichkeit zu
+navigieren.
+
+Wer fish nutzt, hat so etwas ähnliches schon direkt mit eingebaut. Es gibt
+mehrere Tools dieser Art.
+
+image::https://raw.githubusercontent.com/b4b4r07/screenshots/master/enhancd/demo.gif[]
